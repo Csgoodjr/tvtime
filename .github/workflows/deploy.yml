@@ -31,8 +31,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
       - run: yarn install --frozen-lockfile
-      # Skips gracefully until a "test" script exists in package.json.
-      - run: yarn test --if-present
+      # Skips gracefully until a "test" script exists in package.json
+      # (yarn classic has no --if-present flag, unlike npm).
+      - run: |
+          if jq -e '.scripts.test' package.json > /dev/null; then
+            yarn test
+          else
+            echo "No \"test\" script in package.json yet; skipping."
+          fi
 
   deploy:
     name: Deploy to Firebase App Hosting
