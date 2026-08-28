@@ -1,0 +1,21 @@
+{
+  "projectName": "tvtime",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "yarn",
+  "includeExamples": false,
+  "tailwind": true,
+  "projectPreset": "default",
+  "addOnOptions": {},
+  "git": true,
+  "install": true,
+  "intent": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "biome",
+    "better-auth",
+    "tanstack-query"
+  ]
+}
