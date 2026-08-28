@@ -5,7 +5,11 @@ import { PosterCard } from "#/components/PosterCard";
 import type { LibraryEntry } from "#/lib/queries/library";
 import { normalizeLibraryEntry, useLibraryQuery } from "#/lib/queries/library";
 import { tvUpdatesQuery } from "#/lib/queries/tmdb";
-import { hasRecentNewSeason } from "#/lib/tmdb-types";
+import {
+	hasEpisodesLeft,
+	hasRecentNewSeason,
+	isSeasonRecent,
+} from "#/lib/tmdb-types";
 import { useAuth } from "#/lib/use-auth";
 
 type Badge = "new-season" | "watching";
@@ -16,8 +20,10 @@ interface ShelfItem {
 }
 
 /** Homepage shelf for the watchlist: shows with a newly aired season surface
- *  here, and anything currently being watched is always pinned alongside
- *  them (a "new season" badge wins over "watching" when both apply). */
+ *  here, and shows currently being watched are pinned alongside them as long
+ *  as they're still active — an unwatched backlog on a season that finished
+ *  long ago doesn't count as "watching" for this shelf (a "new season" badge
+ *  wins over "watching" when both apply). */
 export function NewSeasonsSection() {
 	const { user } = useAuth();
 	const { data: entries = [] } = useLibraryQuery();
@@ -42,7 +48,12 @@ export function NewSeasonsSection() {
 			const newSeason = update ? hasRecentNewSeason(update) : false;
 			if (newSeason) {
 				result.push({ entry, badge: "new-season" });
-			} else if (entry.status === "watching") {
+			} else if (
+				entry.status === "watching" &&
+				update &&
+				isSeasonRecent(update) &&
+				hasEpisodesLeft(entry, update)
+			) {
 				result.push({ entry, badge: "watching" });
 			}
 		}
