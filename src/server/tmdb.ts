@@ -138,3 +138,14 @@ export const getSeasonDetails = createServerFn({ method: "GET" })
 			`/tv/${data.tvId}/season/${data.seasonNumber}`,
 		);
 	});
+
+/** Slim per-show fetch (no credits/videos/recommendations) used to check a
+ *  batch of watchlisted shows for newly aired seasons. */
+export const getTvUpdates = createServerFn({ method: "GET" })
+	.validator((data: { tvIds: number[] }) => data)
+	.handler(async ({ data }): Promise<TvDetails[]> => {
+		const uniqueIds = [...new Set(data.tvIds)];
+		return Promise.all(
+			uniqueIds.map((id) => tmdbFetch<TvDetails>(`/tv/${id}`)),
+		);
+	});

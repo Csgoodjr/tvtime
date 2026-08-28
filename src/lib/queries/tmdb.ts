@@ -4,6 +4,7 @@ import {
 	getDiscoverFeed,
 	getSeasonDetails,
 	getTitleDetails,
+	getTvUpdates,
 	searchTitles,
 } from "#/server/tmdb";
 
@@ -39,3 +40,15 @@ export const seasonDetailsQuery = (tvId: number, seasonNumber: number) =>
 		queryFn: () => getSeasonDetails({ data: { tvId, seasonNumber } }),
 		staleTime: 24 * HOUR,
 	});
+
+/** Batch season/episode info for a set of watchlisted TV shows, used to
+ *  detect ones with a new season out. */
+export const tvUpdatesQuery = (tvIds: number[]) => {
+	const sortedIds = [...new Set(tvIds)].sort((a, b) => a - b);
+	return queryOptions({
+		queryKey: ["tmdb", "tv-updates", sortedIds] as const,
+		queryFn: () => getTvUpdates({ data: { tvIds: sortedIds } }),
+		staleTime: HOUR,
+		enabled: sortedIds.length > 0,
+	});
+};

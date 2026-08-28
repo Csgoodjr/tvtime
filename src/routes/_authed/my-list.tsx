@@ -3,9 +3,12 @@ import { Bookmark, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EmptyState } from "#/components/EmptyState";
 import { PosterCard, PosterCardSkeleton } from "#/components/PosterCard";
-import type { LibraryEntry, Rating, WatchStatus } from "#/lib/queries/library";
-import { useLibraryQuery, useRemoveEntry } from "#/lib/queries/library";
-import type { NormalizedTitle } from "#/lib/tmdb-types";
+import type { Rating, WatchStatus } from "#/lib/queries/library";
+import {
+	normalizeLibraryEntry,
+	useLibraryQuery,
+	useRemoveEntry,
+} from "#/lib/queries/library";
 
 export const Route = createFileRoute("/_authed/my-list")({
 	component: MyListPage,
@@ -19,19 +22,6 @@ const STATUS_FILTERS: { value: WatchStatus | "all"; label: string }[] = [
 ];
 
 const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"];
-
-function toNormalized(entry: LibraryEntry): NormalizedTitle {
-	return {
-		mediaType: entry.mediaType,
-		id: entry.tmdbId,
-		title: entry.title,
-		overview: "",
-		posterPath: entry.posterPath,
-		backdropPath: null,
-		date: entry.releaseDate,
-		voteAverage: 0,
-	};
-}
 
 function MyListPage() {
 	const { data: entries = [], isLoading } = useLibraryQuery();
@@ -120,7 +110,10 @@ function MyListPage() {
 					{filtered.map((entry) => (
 						<div key={entry.id} className="group relative flex flex-col gap-1">
 							<div className="relative">
-								<PosterCard title={toNormalized(entry)} className="w-full" />
+								<PosterCard
+									title={normalizeLibraryEntry(entry)}
+									className="w-full"
+								/>
 								<button
 									type="button"
 									className="btn btn-circle btn-xs btn-error absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
