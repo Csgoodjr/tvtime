@@ -43,6 +43,19 @@ export function entryId(mediaType: MediaType, tmdbId: number) {
 	return `${mediaType}_${tmdbId}`;
 }
 
+export function normalizeLibraryEntry(entry: LibraryEntry): NormalizedTitle {
+	return {
+		mediaType: entry.mediaType,
+		id: entry.tmdbId,
+		title: entry.title,
+		overview: "",
+		posterPath: entry.posterPath,
+		backdropPath: null,
+		date: entry.releaseDate,
+		voteAverage: 0,
+	};
+}
+
 function entriesCol(uid: string) {
 	return collection(firestore, "users", uid, "entries");
 }

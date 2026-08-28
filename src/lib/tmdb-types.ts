@@ -114,6 +114,8 @@ export interface TvDetails extends MediaBase {
 	in_production: boolean;
 	genres: Genre[];
 	seasons: TvSeasonSummary[];
+	last_episode_to_air: Episode | null;
+	next_episode_to_air: Episode | null;
 	credits?: Credits;
 	recommendations?: Paginated<TvListItem>;
 }
@@ -128,6 +130,30 @@ export interface Episode {
 	air_date: string | null;
 	runtime: number | null;
 	vote_average: number;
+}
+
+// A "new season" reads as: the latest season premiered recently. Requiring
+// last_episode_to_air to *be* that premiere (not just any recent episode)
+// keeps this from firing on every mid-season episode drop, and requiring
+// more than one season keeps a show's very first season from counting as
+// "new" the moment someone adds it.
+const NEW_SEASON_WINDOW_DAYS = 45;
+
+export function hasRecentNewSeason(
+	show: Pick<TvDetails, "number_of_seasons" | "last_episode_to_air">,
+	referenceDate = new Date(),
+): boolean {
+	const last = show.last_episode_to_air;
+	if (!last?.air_date) return false;
+	if (show.number_of_seasons <= 1) return false;
+	if (last.season_number !== show.number_of_seasons) return false;
+	if (last.episode_number !== 1) return false;
+
+	const airedAt = new Date(last.air_date).getTime();
+	if (Number.isNaN(airedAt)) return false;
+
+	const daysSinceAired = (referenceDate.getTime() - airedAt) / 86_400_000;
+	return daysSinceAired >= 0 && daysSinceAired <= NEW_SEASON_WINDOW_DAYS;
 }
 
 export interface SeasonDetails {

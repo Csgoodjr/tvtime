@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { NewSeasonsSection } from "#/components/NewSeasonsSection";
 import { PosterRow } from "#/components/PosterRow";
 import { discoverFeedQuery } from "#/lib/queries/tmdb";
 import { backdropUrl, normalizeTitle, releaseYear } from "#/lib/tmdb-types";
@@ -51,6 +52,7 @@ function Home() {
 			)}
 
 			<div className="flex flex-col gap-8">
+				<NewSeasonsSection />
 				<PosterRow heading="Trending this week" items={data.trending} />
 				<PosterRow heading="New movies" items={data.newMovies} />
 				<PosterRow heading="New shows" items={data.newShows} />
