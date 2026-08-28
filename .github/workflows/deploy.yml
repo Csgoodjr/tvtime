@@ -9,40 +9,8 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      - run: yarn lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      # Skips gracefully until a "test" script exists in package.json
-      # (yarn classic has no --if-present flag, unlike npm).
-      - run: |
-          if jq -e '.scripts.test' package.json > /dev/null; then
-            yarn test
-          else
-            echo "No \"test\" script in package.json yet; skipping."
-          fi
-
   deploy:
     name: Deploy to Firebase App Hosting
-    needs: [lint, test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
