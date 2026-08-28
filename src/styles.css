@@ -1,17 +1,70 @@
-
 @import "tailwindcss";
 
+@plugin "daisyui" {
+	themes: light, dark, night, dim, sunset;
+	logs: false;
+}
+
+/* Cinematic dark theme — the app's default. Poster art carries the screen,
+   so the base ramp stays near-black and desaturated; a warm amber primary
+   reads as the "play / add / rate" action color against it. */
+@plugin "daisyui/theme" {
+	name: "movie";
+	default: true;
+	prefersdark: true;
+	color-scheme: dark;
+
+	--color-base-100: oklch(16% 0.012 268);
+	--color-base-200: oklch(13% 0.014 268);
+	--color-base-300: oklch(10% 0.016 268);
+	--color-base-content: oklch(93% 0.008 268);
+
+	--color-primary: oklch(72% 0.19 38);
+	--color-primary-content: oklch(16% 0.04 38);
+	--color-secondary: oklch(64% 0.16 300);
+	--color-secondary-content: oklch(97% 0.01 300);
+	--color-accent: oklch(78% 0.15 195);
+	--color-accent-content: oklch(18% 0.04 195);
+	--color-neutral: oklch(24% 0.014 268);
+	--color-neutral-content: oklch(90% 0.008 268);
+
+	--color-info: oklch(72% 0.14 232);
+	--color-info-content: oklch(16% 0.04 232);
+	--color-success: oklch(74% 0.16 152);
+	--color-success-content: oklch(16% 0.04 152);
+	--color-warning: oklch(82% 0.17 84);
+	--color-warning-content: oklch(18% 0.05 84);
+	--color-error: oklch(66% 0.21 22);
+	--color-error-content: oklch(97% 0.01 22);
+
+	--radius-selector: 0.5rem;
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 1;
+	--noise: 0;
+}
+
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 html,
 body,
 #app {
-  min-height: 100%;
+	min-height: 100%;
 }
 
 body {
-  margin: 0;
+	margin: 0;
 }
 
+/* Hide horizontal scrollbars on poster carousels without losing scroll. */
+.scrollbar-none {
+	scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+	display: none;
+}

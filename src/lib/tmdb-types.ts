@@ -1,0 +1,198 @@
+// Minimal hand-rolled TMDB types covering only the fields this app uses.
+// See the plan for why: no official SDK exists, and the community wrapper
+// packages are runtime clients (they'd fight our own fetch/caching setup)
+// rather than pure type packages.
+
+export interface Paginated<T> {
+	page: number;
+	results: T[];
+	total_pages: number;
+	total_results: number;
+}
+
+interface MediaBase {
+	id: number;
+	overview: string;
+	poster_path: string | null;
+	backdrop_path: string | null;
+	genre_ids?: number[];
+	popularity: number;
+	vote_average: number;
+	vote_count: number;
+	original_language: string;
+}
+
+export interface MovieListItem extends MediaBase {
+	media_type?: "movie";
+	title: string;
+	original_title: string;
+	release_date: string; // "YYYY-MM-DD" | ""
+	adult: boolean;
+	video: boolean;
+}
+
+export interface TvListItem extends MediaBase {
+	media_type?: "tv";
+	name: string;
+	original_name: string;
+	first_air_date: string; // "YYYY-MM-DD" | ""
+	origin_country: string[];
+}
+
+export interface PersonListItem {
+	media_type: "person";
+	id: number;
+	name: string;
+	profile_path: string | null;
+	known_for_department: string;
+}
+
+export type MultiItem = MovieListItem | TvListItem | PersonListItem;
+
+export function isPerson(item: MultiItem): item is PersonListItem {
+	return item.media_type === "person";
+}
+
+export function isMovie(item: MultiItem): item is MovieListItem {
+	return !isPerson(item) && "title" in item;
+}
+
+export function isTv(item: MultiItem): item is TvListItem {
+	return !isPerson(item) && "name" in item && "first_air_date" in item;
+}
+
+export type TitleItem = MovieListItem | TvListItem;
+export type MediaType = "movie" | "tv";
+
+interface Genre {
+	id: number;
+	name: string;
+}
+
+interface CastMember {
+	id: number;
+	name: string;
+	character: string;
+	profile_path: string | null;
+	order: number;
+}
+
+interface Credits {
+	cast: CastMember[];
+}
+
+export interface MovieDetails extends MediaBase {
+	title: string;
+	original_title: string;
+	release_date: string;
+	runtime: number | null;
+	tagline: string;
+	status: string;
+	genres: Genre[];
+	credits?: Credits;
+	recommendations?: Paginated<MovieListItem>;
+}
+
+export interface TvSeasonSummary {
+	id: number;
+	season_number: number;
+	name: string;
+	episode_count: number;
+	poster_path: string | null;
+	air_date: string | null;
+}
+
+export interface TvDetails extends MediaBase {
+	name: string;
+	original_name: string;
+	first_air_date: string;
+	episode_run_time: number[];
+	tagline: string;
+	status: string;
+	number_of_seasons: number;
+	number_of_episodes: number;
+	in_production: boolean;
+	genres: Genre[];
+	seasons: TvSeasonSummary[];
+	credits?: Credits;
+	recommendations?: Paginated<TvListItem>;
+}
+
+export interface Episode {
+	id: number;
+	episode_number: number;
+	season_number: number;
+	name: string;
+	overview: string;
+	still_path: string | null;
+	air_date: string | null;
+	runtime: number | null;
+	vote_average: number;
+}
+
+export interface SeasonDetails {
+	id: number;
+	season_number: number;
+	name: string;
+	episodes: Episode[];
+}
+
+/** Normalized shape every card/row renders from, regardless of source endpoint. */
+export interface NormalizedTitle {
+	mediaType: MediaType;
+	id: number;
+	title: string;
+	overview: string;
+	posterPath: string | null;
+	backdropPath: string | null;
+	date: string | null; // null rather than ""
+	voteAverage: number;
+}
+
+export function normalizeTitle(item: TitleItem): NormalizedTitle {
+	if (isMovie(item)) {
+		return {
+			mediaType: "movie",
+			id: item.id,
+			title: item.title,
+			overview: item.overview,
+			posterPath: item.poster_path,
+			backdropPath: item.backdrop_path,
+			date: item.release_date || null,
+			voteAverage: item.vote_average,
+		};
+	}
+	return {
+		mediaType: "tv",
+		id: item.id,
+		title: item.name,
+		overview: item.overview,
+		posterPath: item.poster_path,
+		backdropPath: item.backdrop_path,
+		date: item.first_air_date || null,
+		voteAverage: item.vote_average,
+	};
+}
+
+const IMAGE_BASE = "https://image.tmdb.org/t/p/";
+
+export type PosterSize = "w92" | "w185" | "w342" | "w500" | "original";
+export type BackdropSize = "w300" | "w780" | "w1280" | "original";
+
+export function posterUrl(
+	path: string | null,
+	size: PosterSize = "w342",
+): string | null {
+	return path ? `${IMAGE_BASE}${size}${path}` : null;
+}
+
+export function backdropUrl(
+	path: string | null,
+	size: BackdropSize = "w1280",
+): string | null {
+	return path ? `${IMAGE_BASE}${size}${path}` : null;
+}
+
+export function releaseYear(date: string | null): string | null {
+	return date ? date.slice(0, 4) : null;
+}

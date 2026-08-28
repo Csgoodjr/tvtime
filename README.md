@@ -1,13 +1,25 @@
-Welcome to your new TanStack Start app!
+TVTime — track the movies and shows you watch, rate them thumbs up/down, and
+follow TV progress episode by episode. Built on TanStack Start, TanStack
+Query, Firebase (Auth + Firestore), TMDB, daisyUI and Headless UI.
 
 # Getting Started
-
-To run this application:
 
 ```bash
 yarn install
 yarn run dev
 ```
+
+## Configuration
+
+- **TMDB**: set `TMDB_READ_TOKEN` in `.env.local` (a TMDB v3 API Read Access
+  Token, kept server-side only — see `src/server/tmdb.ts`).
+- **Firebase**: the web app config in `src/lib/firebase.ts` is not a secret
+  and ships as-is; Firestore security rules (`firestore.rules`) are the real
+  access boundary. For Google sign-in to work locally, `localhost` must be in
+  the Firebase Auth authorized domains — this repo's `firebase.json` already
+  declares it under `auth.authorizedDomains`; run
+  `firebase deploy --only auth,firestore:rules,firestore:indexes` once to
+  push it (and the security rules) to the project.
 
 # Building For Production
 
@@ -42,40 +54,13 @@ yarn run check
 ```
 
 
-## Setting up Better Auth
+## Authentication
 
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   yarn dlx @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
-
-```bash
-yarn dlx @better-auth/cli migrate
-```
-
-
+Auth is handled entirely by the Firebase web SDK (`src/lib/auth-store.ts`) —
+Google sign-in and email/password — rather than a separate auth server. It
+keeps its session in IndexedDB, not a cookie, so the signed-in library at
+`/my-list` is a client-only route (`src/routes/_authed.tsx`, `ssr: false`);
+Discover, Search and Title detail stay fully server-rendered for everyone.
 
 ## Routing
 

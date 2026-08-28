@@ -20,6 +20,11 @@
     ]
   },
   "auth": {
+    "authorizedDomains": [
+      "localhost",
+      "tvtime--tvtime-d058b.us-central1.hosted.app",
+      "tvtime-150622237379.us-central1.run.app"
+    ],
     "providers": {
       "emailPassword": true,
       "googleSignIn": {
@@ -27,5 +32,16 @@
         "supportEmail": "csgoodjr@yahoo.com"
       }
     }
+  },
+  "apphosting": {
+    "backendId": "tvtime",
+    "rootDir": "/",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "dist"
+    ]
   }
 }

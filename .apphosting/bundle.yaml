@@ -1,0 +1,21 @@
+# Tells Firebase App Hosting's generic Node.js buildpack how to run this
+# app and which build output to keep in the deployed image. Without this,
+# the buildpack has no framework adapter for TanStack Start and falls back
+# to treating `public/` as the static site — it never sees `dist/` or
+# `server.mjs`. https://github.com/FirebaseExtended/firebase-framework-tools
+version: v1
+
+runConfig:
+  runCommand: node server.mjs
+
+outputFiles:
+  serverApp:
+    include:
+      - dist
+      - server.mjs
+
+metadata:
+  adapterPackageName: tvtime-node-server
+  adapterVersion: 1.0.0
+  framework: tanstack-start
+  frameworkVersion: 1.168.49
