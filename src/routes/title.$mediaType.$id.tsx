@@ -66,7 +66,7 @@ function TitleDetail() {
 		: [];
 
 	return (
-		<div className="flex flex-col gap-8 pb-16">
+		<div className="flex flex-col gap-8 sm:pb-16">
 			<div className="relative h-[38vh] min-h-64 w-full overflow-hidden sm:h-[46vh]">
 				{backdrop && (
 					<img
