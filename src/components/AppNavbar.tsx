@@ -26,6 +26,14 @@ export function AppNavbar() {
 
 			<div className="navbar-center hidden gap-1 md:flex">
 				<Link
+					to="/home"
+					className="btn btn-ghost btn-sm"
+					activeOptions={{ exact: true }}
+					activeProps={{ className: "btn-active" }}
+				>
+					Home
+				</Link>
+				<Link
 					to="/"
 					className="btn btn-ghost btn-sm"
 					activeOptions={{ exact: true }}

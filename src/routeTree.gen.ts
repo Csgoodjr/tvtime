@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AuthedHomeRouteImport } from './routes/_authed/home'
 import { Route as AuthedMyListRouteImport } from './routes/_authed/my-list'
 import { Route as TitleMediaTypeIdRouteImport } from './routes/title.$mediaType.$id'
 
@@ -35,6 +36,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedHomeRoute = AuthedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedMyListRoute = AuthedMyListRouteImport.update({
   id: '/my-list',
   path: '/my-list',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
+  '/home': typeof AuthedHomeRoute
   '/my-list': typeof AuthedMyListRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
+  '/home': typeof AuthedHomeRoute
   '/my-list': typeof AuthedMyListRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
@@ -66,20 +74,24 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/search': typeof SearchRoute
+  '/_authed/home': typeof AuthedHomeRoute
   '/_authed/my-list': typeof AuthedMyListRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/search' | '/my-list' | '/title/$mediaType/$id'
+  fullPaths:
+    '/' | '/login' | '/search' | '/home' | '/my-list' | '/title/$mediaType/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/search' | '/my-list' | '/title/$mediaType/$id'
+  to:
+    '/' | '/login' | '/search' | '/home' | '/my-list' | '/title/$mediaType/$id'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/login'
     | '/search'
+    | '/_authed/home'
     | '/_authed/my-list'
     | '/title/$mediaType/$id'
   fileRoutesById: FileRoutesById
@@ -122,6 +134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/home': {
+      id: '/_authed/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthedHomeRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/my-list': {
       id: '/_authed/my-list'
       path: '/my-list'
@@ -140,10 +159,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedHomeRoute: typeof AuthedHomeRoute
   AuthedMyListRoute: typeof AuthedMyListRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedHomeRoute: AuthedHomeRoute,
   AuthedMyListRoute: AuthedMyListRoute,
 }
 

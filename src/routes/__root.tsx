@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { AppNavbar } from "#/components/AppNavbar";
+import { MobileDock } from "#/components/MobileDock";
 import { PwaRegister } from "#/components/PwaRegister";
 import { getThemeCookie, themeAttr } from "#/lib/theme";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -86,7 +87,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body className="bg-base-100 text-base-content min-h-screen">
 				<PwaRegister />
 				<AppNavbar />
-				<main>{children}</main>
+				<main>
+					{children}
+					{/* Reserves scroll space so page content never sits under the fixed MobileDock. */}
+					<div className="h-16 sm:hidden" aria-hidden />
+				</main>
+				<MobileDock />
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

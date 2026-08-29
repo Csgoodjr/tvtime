@@ -10,7 +10,18 @@ import {
 	useRemoveEntry,
 } from "#/lib/queries/library";
 
+interface MyListSearch {
+	status?: WatchStatus;
+}
+
+function isWatchStatus(value: unknown): value is WatchStatus {
+	return value === "want" || value === "watching" || value === "watched";
+}
+
 export const Route = createFileRoute("/_authed/my-list")({
+	validateSearch: (search: Record<string, unknown>): MyListSearch => ({
+		status: isWatchStatus(search.status) ? search.status : undefined,
+	}),
 	component: MyListPage,
 });
 
@@ -24,9 +35,12 @@ const STATUS_FILTERS: { value: WatchStatus | "all"; label: string }[] = [
 const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 function MyListPage() {
+	const { status: initialStatus } = Route.useSearch();
 	const { data: entries = [], isLoading } = useLibraryQuery();
 	const removeEntry = useRemoveEntry();
-	const [statusFilter, setStatusFilter] = useState<WatchStatus | "all">("all");
+	const [statusFilter, setStatusFilter] = useState<WatchStatus | "all">(
+		initialStatus ?? "all",
+	);
 	const [ratingFilter, setRatingFilter] = useState<Rating | "all">("all");
 
 	const filtered = useMemo(() => {
