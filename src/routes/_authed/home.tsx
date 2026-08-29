@@ -18,6 +18,7 @@ import {
 	useLibraryQuery,
 	type WatchStatus,
 } from "#/lib/queries/library";
+import { hasEpisodesLeft } from "#/lib/tmdb-types";
 import { useAuth } from "#/lib/use-auth";
 
 export const Route = createFileRoute("/_authed/home")({
@@ -51,7 +52,13 @@ function HomePage() {
 		[entries],
 	);
 
-	const watching = useMemo(() => byStatus(entries, "watching"), [entries]);
+	const watching = useMemo(
+		() =>
+			byStatus(entries, "watching").filter(
+				(e) => e.mediaType !== "tv" || hasEpisodesLeft(e),
+			),
+		[entries],
+	);
 	const want = useMemo(() => byStatus(entries, "want"), [entries]);
 	const watched = useMemo(() => byStatus(entries, "watched"), [entries]);
 
