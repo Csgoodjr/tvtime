@@ -11,6 +11,7 @@ import type { ComponentType } from "react";
 import { useMemo } from "react";
 import { EmptyState } from "#/components/EmptyState";
 import { PosterCard } from "#/components/PosterCard";
+import { UpcomingSection } from "#/components/UpcomingSection";
 import {
 	type LibraryEntry,
 	normalizeLibraryEntry,
@@ -108,6 +109,8 @@ function HomePage() {
 				/>
 				<Stat icon={ListChecks} label="In your list" value={stats.total} />
 			</div>
+
+			<UpcomingSection />
 
 			<LibraryRow
 				heading="Continue watching"
