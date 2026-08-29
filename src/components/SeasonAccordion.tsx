@@ -31,7 +31,7 @@ export function SeasonAccordion({ tvId, season, title, totalEpisodes }: Props) {
 	const { watched, loading: watchedLoading } = useSeasonWatched(
 		entryId("tv", tvId),
 		season.season_number,
-		open && authStatus === "signed-in",
+		authStatus === "signed-in",
 	);
 	const toggleEpisode = useToggleEpisode();
 	const setSeasonWatched = useSetSeasonWatched();
