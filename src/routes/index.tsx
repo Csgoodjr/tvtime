@@ -21,7 +21,7 @@ function Home() {
 		: null;
 
 	return (
-		<div className="flex flex-col gap-8 pb-16">
+		<div className="flex flex-col gap-8 sm:pb-16">
 			{heroTitle && (
 				<div className="relative h-[46vh] min-h-72 w-full overflow-hidden sm:h-[56vh]">
 					{heroBackdrop && (
