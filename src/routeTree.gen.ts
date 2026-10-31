@@ -15,6 +15,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as AuthedHomeRouteImport } from './routes/_authed/home'
 import { Route as AuthedMyListRouteImport } from './routes/_authed/my-list'
+import { Route as AuthedPeopleRouteImport } from './routes/_authed/people'
+import { Route as AuthedUUidRouteImport } from './routes/_authed/u.$uid'
 import { Route as TitleMediaTypeIdRouteImport } from './routes/title.$mediaType.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +48,16 @@ const AuthedMyListRoute = AuthedMyListRouteImport.update({
   path: '/my-list',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedPeopleRoute = AuthedPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedUUidRoute = AuthedUUidRouteImport.update({
+  id: '/u/$uid',
+  path: '/u/$uid',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const TitleMediaTypeIdRoute = TitleMediaTypeIdRouteImport.update({
   id: '/title/$mediaType/$id',
   path: '/title/$mediaType/$id',
@@ -58,6 +70,8 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/home': typeof AuthedHomeRoute
   '/my-list': typeof AuthedMyListRoute
+  '/people': typeof AuthedPeopleRoute
+  '/u/$uid': typeof AuthedUUidRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +80,8 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/home': typeof AuthedHomeRoute
   '/my-list': typeof AuthedMyListRoute
+  '/people': typeof AuthedPeopleRoute
+  '/u/$uid': typeof AuthedUUidRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
 export interface FileRoutesById {
@@ -76,15 +92,31 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/_authed/home': typeof AuthedHomeRoute
   '/_authed/my-list': typeof AuthedMyListRoute
+  '/_authed/people': typeof AuthedPeopleRoute
+  '/_authed/u/$uid': typeof AuthedUUidRoute
   '/title/$mediaType/$id': typeof TitleMediaTypeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/search' | '/home' | '/my-list' | '/title/$mediaType/$id'
+    | '/'
+    | '/login'
+    | '/search'
+    | '/home'
+    | '/my-list'
+    | '/people'
+    | '/u/$uid'
+    | '/title/$mediaType/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/login' | '/search' | '/home' | '/my-list' | '/title/$mediaType/$id'
+    | '/'
+    | '/login'
+    | '/search'
+    | '/home'
+    | '/my-list'
+    | '/people'
+    | '/u/$uid'
+    | '/title/$mediaType/$id'
   id:
     | '__root__'
     | '/'
@@ -93,6 +125,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/_authed/home'
     | '/_authed/my-list'
+    | '/_authed/people'
+    | '/_authed/u/$uid'
     | '/title/$mediaType/$id'
   fileRoutesById: FileRoutesById
 }
@@ -148,6 +182,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedMyListRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/people': {
+      id: '/_authed/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof AuthedPeopleRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/u/$uid': {
+      id: '/_authed/u/$uid'
+      path: '/u/$uid'
+      fullPath: '/u/$uid'
+      preLoaderRoute: typeof AuthedUUidRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/title/$mediaType/$id': {
       id: '/title/$mediaType/$id'
       path: '/title/$mediaType/$id'
@@ -161,11 +209,15 @@ declare module '@tanstack/react-router' {
 interface AuthedRouteChildren {
   AuthedHomeRoute: typeof AuthedHomeRoute
   AuthedMyListRoute: typeof AuthedMyListRoute
+  AuthedPeopleRoute: typeof AuthedPeopleRoute
+  AuthedUUidRoute: typeof AuthedUUidRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedHomeRoute: AuthedHomeRoute,
   AuthedMyListRoute: AuthedMyListRoute,
+  AuthedPeopleRoute: AuthedPeopleRoute,
+  AuthedUUidRoute: AuthedUUidRoute,
 }
 
 const AuthedRouteWithChildren =

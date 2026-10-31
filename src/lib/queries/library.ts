@@ -11,6 +11,7 @@ import {
 	getDocs,
 	increment,
 	onSnapshot,
+	type QueryDocumentSnapshot,
 	runTransaction,
 	serverTimestamp,
 	setDoc,
@@ -56,7 +57,25 @@ export function normalizeLibraryEntry(entry: LibraryEntry): NormalizedTitle {
 	};
 }
 
-function entriesCol(uid: string) {
+export function docToLibraryEntry(d: QueryDocumentSnapshot): LibraryEntry {
+	const data = d.data();
+	return {
+		id: d.id,
+		mediaType: data.mediaType,
+		tmdbId: data.tmdbId,
+		title: data.title,
+		posterPath: data.posterPath ?? null,
+		releaseDate: data.releaseDate ?? null,
+		status: data.status ?? null,
+		rating: data.rating ?? null,
+		episodesWatched: data.episodesWatched ?? 0,
+		totalEpisodes: data.totalEpisodes ?? null,
+		addedAt: data.addedAt?.toMillis?.() ?? null,
+		updatedAt: data.updatedAt?.toMillis?.() ?? null,
+	};
+}
+
+export function entriesCol(uid: string) {
 	return collection(firestore, "users", uid, "entries");
 }
 
@@ -87,24 +106,10 @@ export function useLibraryQuery() {
 	useEffect(() => {
 		if (!uid) return;
 		const unsubscribe = onSnapshot(entriesCol(uid), (snapshot) => {
-			const entries: LibraryEntry[] = snapshot.docs.map((d) => {
-				const data = d.data();
-				return {
-					id: d.id,
-					mediaType: data.mediaType,
-					tmdbId: data.tmdbId,
-					title: data.title,
-					posterPath: data.posterPath ?? null,
-					releaseDate: data.releaseDate ?? null,
-					status: data.status,
-					rating: data.rating ?? null,
-					episodesWatched: data.episodesWatched ?? 0,
-					totalEpisodes: data.totalEpisodes ?? null,
-					addedAt: data.addedAt?.toMillis?.() ?? null,
-					updatedAt: data.updatedAt?.toMillis?.() ?? null,
-				};
-			});
-			queryClient.setQueryData(libraryKey(uid), entries);
+			queryClient.setQueryData(
+				libraryKey(uid),
+				snapshot.docs.map(docToLibraryEntry),
+			);
 		});
 		return unsubscribe;
 	}, [uid, queryClient]);
@@ -114,9 +119,7 @@ export function useLibraryQuery() {
 		queryFn: async () => {
 			if (!uid) return [];
 			const snapshot = await getDocs(entriesCol(uid));
-			return snapshot.docs.map(
-				(d) => ({ id: d.id, ...d.data() }) as LibraryEntry,
-			);
+			return snapshot.docs.map(docToLibraryEntry);
 		},
 		enabled: !!uid,
 		staleTime: Number.POSITIVE_INFINITY, // onSnapshot keeps it fresh

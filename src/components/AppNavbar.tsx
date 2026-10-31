@@ -6,6 +6,7 @@ import {
 	LogIn,
 	LogOut,
 	Search as SearchIcon,
+	Users,
 } from "lucide-react";
 import { SearchCombobox } from "#/components/SearchCombobox";
 import { ThemePicker } from "#/components/ThemePicker";
@@ -54,6 +55,13 @@ export function AppNavbar() {
 					activeProps={{ className: "btn-active" }}
 				>
 					My List
+				</Link>
+				<Link
+					to="/people"
+					className="btn btn-ghost btn-sm"
+					activeProps={{ className: "btn-active" }}
+				>
+					People
 				</Link>
 			</div>
 
@@ -108,6 +116,15 @@ export function AppNavbar() {
 								>
 									<ListVideo className="size-4" aria-hidden />
 									My List
+								</Link>
+							</MenuItem>
+							<MenuItem>
+								<Link
+									to="/people"
+									className="data-focus:bg-base-300 flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+								>
+									<Users className="size-4" aria-hidden />
+									People
 								</Link>
 							</MenuItem>
 							<MenuItem>
