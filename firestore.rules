@@ -2,25 +2,120 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
     function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function profilePath(uid) {
+      return /databases/$(database)/documents/profiles/$(uid);
+    }
+
+    function handlePath(handle) {
+      return /databases/$(database)/documents/handles/$(handle);
+    }
+
+    // True only if `uid` has explicitly accepted a follow request from the
+    // caller. The follow doc's id is `${followerUid}_${targetUid}`, but the
+    // stored fields are re-checked too so a uid that itself contains "_"
+    // can never alias someone else's follow doc.
+    function isAcceptedFollower(uid) {
+      let followPath = /databases/$(database)/documents/follows/$(request.auth.uid + '_' + uid);
+      return signedIn()
+        && exists(followPath)
+        && get(followPath).data.status == 'accepted'
+        && get(followPath).data.followerUid == request.auth.uid
+        && get(followPath).data.targetUid == uid;
     }
 
     match /users/{uid} {
       allow read, write: if isOwner(uid);
 
       match /entries/{entryId} {
-        allow read: if isOwner(uid);
+        // Owners always; followers only after the owner accepted them.
+        // Revoking (deleting the follow doc) cuts access on the next read.
+        allow read: if isOwner(uid) || isAcceptedFollower(uid);
         allow write: if isOwner(uid)
           && (request.resource.data.get('status', null) == null
               || request.resource.data.get('status', null) in ['want', 'watching', 'watched'])
           && (request.resource.data.get('rating', null) == null
               || request.resource.data.get('rating', null) in ['up', 'down']);
 
+        // Per-episode detail stays owner-only; followers see the entry-level
+        // progress (episodesWatched / totalEpisodes) and nothing deeper.
         match /seasons/{seasonNumber} {
           allow read, write: if isOwner(uid);
         }
       }
+    }
+
+    // Public-facing profile: only what other people need to recognise you.
+    // `get` (not `list`) so nobody can enumerate every user — you have to
+    // already know a uid, which in practice means looking up a handle.
+    // Never holds email or any credential.
+    match /profiles/{uid} {
+      allow get: if signedIn();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['handle', 'displayName', 'photoURL', 'updatedAt'])
+        && request.resource.data.handle is string
+        && getAfter(handlePath(request.resource.data.handle)).data.uid == uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 50
+        && (request.resource.data.photoURL == null
+            || (request.resource.data.photoURL is string
+                && request.resource.data.photoURL.size() <= 1000
+                && request.resource.data.photoURL.matches('^https://.*')))
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner(uid);
+    }
+
+    // handle -> uid, one doc per handle so uniqueness is enforced by doc id:
+    // there is no update rule, so a taken handle can't be overwritten.
+    // Claimed in the same batch that points the caller's profile at it.
+    match /handles/{handle} {
+      allow get: if signedIn();
+      allow create: if signedIn()
+        && handle.matches('^[a-z0-9_]{3,20}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(profilePath(request.auth.uid)).data.handle == handle;
+      allow delete: if signedIn()
+        && resource.data.uid == request.auth.uid
+        && (!existsAfter(profilePath(request.auth.uid))
+            || getAfter(profilePath(request.auth.uid)).data.handle != handle);
+    }
+
+    // Follow requests. id = `${followerUid}_${targetUid}`.
+    //  - Only the follower can create one, and only as "pending".
+    //  - Only the target can accept it (pending -> accepted, nothing else).
+    //  - Either side can delete it: unfollow, cancel, decline, or remove.
+    match /follows/{followId} {
+      allow read: if signedIn()
+        && (resource.data.followerUid == request.auth.uid
+            || resource.data.targetUid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['followerUid', 'targetUid', 'status', 'createdAt', 'updatedAt'])
+        && request.resource.data.followerUid == request.auth.uid
+        && request.resource.data.targetUid is string
+        && request.resource.data.targetUid != request.auth.uid
+        && followId == request.auth.uid + '_' + request.resource.data.targetUid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && exists(profilePath(request.auth.uid))
+        && exists(profilePath(request.resource.data.targetUid));
+      allow update: if signedIn()
+        && resource.data.targetUid == request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn()
+        && (resource.data.followerUid == request.auth.uid
+            || resource.data.targetUid == request.auth.uid);
     }
   }
 }

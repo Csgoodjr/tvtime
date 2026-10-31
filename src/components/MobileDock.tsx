@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Bookmark, Compass, Home, Search } from "lucide-react";
+import { Bookmark, Compass, Home, Search, Users } from "lucide-react";
 
 const ITEMS = [
 	{ to: "/home" as const, label: "Home", icon: Home, exact: true },
 	{ to: "/" as const, label: "Discover", icon: Compass, exact: true },
 	{ to: "/search" as const, label: "Search", icon: Search, exact: false },
 	{ to: "/my-list" as const, label: "My List", icon: Bookmark, exact: false },
+	{ to: "/people" as const, label: "People", icon: Users, exact: false },
 ];
 
 /** Bottom tab bar shown on mobile only — the navbar covers this at sm and up. */
