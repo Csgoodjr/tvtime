@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
+import { Check, CheckCheck } from "lucide-react";
 import { useState } from "react";
 import {
 	entryId,
@@ -90,14 +90,35 @@ export function SeasonAccordion({ tvId, season, title, totalEpisodes }: Props) {
 				) : (
 					<div className="flex flex-col gap-1">
 						{authStatus === "signed-in" && episodes.length > 0 && (
-							<button
-								type="button"
-								className="btn btn-ghost btn-xs self-end"
-								disabled={allWatched}
-								onClick={markAllWatched}
-							>
-								Mark all watched
-							</button>
+							<div className="mb-1 flex justify-end">
+								{allWatched ? (
+									// Done state replaces the button rather than greying it out:
+									// a disabled button reads as "broken", this reads as "finished".
+									// Same height as btn-sm so the list doesn't shift on completion.
+									<output className="text-success flex h-8 items-center gap-1.5 px-3 text-xs font-medium">
+										<CheckCheck className="size-4" aria-hidden />
+										All watched
+									</output>
+								) : (
+									<button
+										type="button"
+										className="btn btn-soft btn-primary btn-sm gap-1.5"
+										disabled={setSeasonWatched.isPending}
+										onClick={markAllWatched}
+										aria-label={`Mark all episodes of ${season.name} watched`}
+									>
+										{setSeasonWatched.isPending ? (
+											<span
+												className="loading loading-spinner loading-xs"
+												aria-hidden
+											/>
+										) : (
+											<CheckCheck className="size-4" aria-hidden />
+										)}
+										Mark all watched
+									</button>
+								)}
+							</div>
 						)}
 						{episodes.map((ep) => {
 							const isWatched = watched.includes(ep.episode_number);
